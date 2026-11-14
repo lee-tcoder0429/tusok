@@ -6,7 +6,7 @@ import { fbEnabled, fbSubscribe } from '../lib/firebase.js'
 import { liveStatus, T_READY } from '../lib/status.js'
 import { VOUCHER_URL, pad } from '../lib/util.js'
 
-const NAMES = ['Aira', 'Migs', 'Jom', 'Bea', 'Paolo', 'Trish', 'Enzo', 'Kaye', 'Nico', 'Ysa', 'Carlo', 'Lia']
+const NAMES = ['J', 'Jed', 'JC', 'Haya', 'Vaughn', 'Yosh', 'Drei', 'Andrei', 'Shane', 'Abby', 'Erron', 'Aeron', 'Dom', 'Ranzel']
 const READY_TTL = 5 * 60 * 1000 // real ready orders drop off the board after 5 minutes
 
 // Seeded demo orders so the board never looks empty (fallback mode only).
@@ -14,13 +14,13 @@ function initialSeeds() {
   const now = Date.now()
   return {
     next: 18,
-    name: 3,
+    name: 5,
     list: [
-      { key: 's12', no: '012', name: 'Bea', status: 'ready', readyAt: now - 90000 },
-      { key: 's14', no: '014', name: 'Kent', status: 'ready', readyAt: now - 4000 },
-      { key: 's15', no: '015', name: 'Aira', status: 'cooking' },
-      { key: 's16', no: '016', name: 'Migs', status: 'cooking' },
-      { key: 's17', no: '017', name: 'Jom', status: 'cooking' },
+      { key: 's12', no: '012', name: NAMES[0], status: 'ready', readyAt: now - 90000 },
+      { key: 's14', no: '014', name: NAMES[1], status: 'ready', readyAt: now - 4000 },
+      { key: 's15', no: '015', name: NAMES[2], status: 'cooking' },
+      { key: 's16', no: '016', name: NAMES[3], status: 'cooking' },
+      { key: 's17', no: '017', name: NAMES[4], status: 'cooking' },
     ],
   }
 }
