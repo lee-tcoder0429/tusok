@@ -8,6 +8,7 @@ const Voucher = lazy(() => import('./pages/Voucher.jsx'))
 const Checkout = lazy(() => import('./pages/Checkout.jsx'))
 const Tracker = lazy(() => import('./pages/Tracker.jsx'))
 const Board = lazy(() => import('./pages/Board.jsx'))
+const Orders = lazy(() => import('./pages/Orders.jsx'))
 const Patterns = lazy(() => import('./pages/Patterns.jsx'))
 
 // Scroll to top on navigation, or to the #hash target (used by the HCI Patterns "Show me" links).
@@ -42,6 +43,7 @@ export default function App() {
           <Route path="/v" element={<Voucher />} />
           <Route path="/checkout" element={<Checkout />} />
           <Route path="/order/:id" element={<Tracker />} />
+          <Route path="/orders" element={<Orders />} />
           <Route path="/board" element={<Board />} />
           <Route path="/patterns" element={<Patterns />} />
           <Route path="*" element={<Home />} />

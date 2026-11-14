@@ -5,7 +5,7 @@ import Footer from '../components/Footer.jsx'
 import FoodSticker from '../components/FoodSticker.jsx'
 import Sheet from '../components/Sheet.jsx'
 import Stepper from '../components/Stepper.jsx'
-import { MENU, SAWSAWAN, byId, peso } from '../data/menu.js'
+import { MENU, REVIEWS, SAWSAWAN, byId, peso } from '../data/menu.js'
 import { useStore } from '../store.jsx'
 import { flyToBilao } from '../lib/fly.js'
 
@@ -152,9 +152,17 @@ function Filters({ f, setF, base, pre }) {
   )
 }
 
-function Card({ it, onOpen, onAdd }) {
+function Heart({ on }) {
+  return <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M12 20.5S3.5 15.4 3.5 9.3A4.3 4.3 0 0 1 12 7.6a4.3 4.3 0 0 1 8.5 1.7c0 6.1-8.5 11.2-8.5 11.2z" fill={on ? '#BE185D' : 'none'} stroke={on ? '#BE185D' : 'currentColor'} strokeWidth="2.4" strokeLinejoin="round" /></svg>
+}
+
+function Card({ it, onOpen, onAdd, fav, onFav }) {
   return (
-    <li className="card on-light flex flex-col p-2.5">
+    <li className="card on-light relative flex flex-col p-2.5">
+      <button type="button" onClick={() => onFav(it)} aria-pressed={fav} aria-label={fav ? `Alisin ang ${it.name} sa paborito` : `Idagdag ang ${it.name} sa paborito`}
+        className="absolute right-4 top-4 z-10 flex h-11 w-11 items-center justify-center rounded-full border-2 border-ink bg-cream">
+        <Heart on={fav} />
+      </button>
       <button type="button" onClick={() => onOpen(it)} aria-haspopup="dialog" aria-label={`Tingnan ang detalye ng ${it.name}`} className="flex flex-1 flex-col rounded-[20px] text-left">
         <span className={`relative flex h-28 w-full items-center justify-center rounded-[20px] ${TILE[it.category]}`}>
           <FoodSticker type={it.id} size={84} />
@@ -166,7 +174,7 @@ function Card({ it, onOpen, onAdd }) {
         <span className="display mt-2 block px-1 text-xl">{it.name}</span>
         <span className="flex items-center justify-between px-1 text-sm">
           <span className="text-ink/80">{it.unit}</span>
-          <span aria-label={`Rating ${it.rating} sa 5`} className="font-bold"><span aria-hidden="true">★ </span>{it.rating}</span>
+          <span aria-label={`Rating ${it.rating} sa 5, ${it.reviews} reviews`} className="font-bold"><span aria-hidden="true">★ </span>{it.rating} <span className="font-normal text-ink/75">({it.reviews})</span></span>
         </span>
         <span className="mt-1 block px-1 text-lg font-bold">{peso(it.price)}</span>
       </button>
@@ -182,7 +190,8 @@ function Card({ it, onOpen, onAdd }) {
 }
 
 export default function Shop() {
-  const { add, toast, cart, sawsawan, setSawsawan } = useStore()
+  const { add, toast, cart, sawsawan, setSawsawan, favs, toggleFav, count, total } = useStore()
+  const [favOnly, setFavOnly] = useState(false)
   const [q, setQ] = useState('')
   const [cat, setCat] = useState('lahat')
   const [f, setF] = useState(F0)
@@ -195,7 +204,8 @@ export default function Shop() {
 
   const searched = useMemo(() => MENU.filter((it) => matches(it, q)), [q])
   const base = useMemo(() => searched.filter((it) => cat === 'lahat' || it.category === cat), [searched, cat])
-  const results = useMemo(() => base.filter((it) => passes(it, f)).sort(SORTS[sort][1]), [base, f, sort])
+  const results = useMemo(() => base.filter((it) => passes(it, f) && (!favOnly || favs.includes(it.id))).sort(SORTS[sort][1]), [base, f, sort, favOnly, favs])
+  const onFav = (it) => { toggleFav(it.id); toast(favs.includes(it.id) ? `Inalis sa paborito: ${it.name}` : `Paborito na: ${it.name}`) }
   const catCount = (c) => searched.filter((it) => (c === 'lahat' || it.category === c) && passes(it, f)).length
 
   const chips = [
@@ -204,9 +214,10 @@ export default function Shop() {
     ...CHECKS.map(([k, label]) => f[k] && { key: k, label, clear: () => setF({ ...f, [k]: false }) }),
     f.max < 40 && { key: 'max', label: `Hanggang ₱${f.max}`, clear: () => setF({ ...f, max: 40 }) },
     f.avail && { key: 'avail', label: 'Available ngayon', clear: () => setF({ ...f, avail: false }) },
+    favOnly && { key: 'fav', label: 'Mga paborito ko', clear: () => setFavOnly(false) },
   ].filter(Boolean)
   const filterCount = chips.filter((c) => c.key !== 'q' && c.key !== 'cat').length
-  const clearAll = () => { setQ(''); setCat('lahat'); setF(F0) }
+  const clearAll = () => { setQ(''); setCat('lahat'); setF(F0); setFavOnly(false) }
 
   const onAdd = (it, n = 1, fromEl) => {
     add(it.id, n)
@@ -283,6 +294,10 @@ export default function Shop() {
                 <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M4 6h16M7 12h10M10 18h4" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" /></svg>
                 Filters{filterCount > 0 && <span className="rounded-full bg-ink px-2 text-sm text-cream">{filterCount}</span>}
               </button>
+              <button id="favs" type="button" onClick={() => setFavOnly((v) => !v)} aria-pressed={favOnly}
+                className={`btn !px-4 ${favOnly ? 'btn-yellow' : 'btn-cream'}`}>
+                <Heart on={favOnly || favs.length > 0} /> Paborito <span className="rounded-full bg-ink px-2 text-sm text-cream">{favs.length}</span>
+              </button>
               <div id="sort" className="on-light ml-auto flex items-center gap-2">
                 <label htmlFor="sort-select" className="text-sm font-bold text-cream">Ayusin:</label>
                 <select id="sort-select" value={sort} onChange={(e) => setSort(e.target.value)}
@@ -319,7 +334,7 @@ export default function Shop() {
               </div>
             ) : (
               <ul id="grid" role="tabpanel" aria-label={`${CAT_LABEL[cat]} — ${results.length} items`} className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4">
-                {results.map((it) => <Card key={it.id} it={it} onOpen={(x) => { setView(x); setQtyLocal(1) }} onAdd={onAdd} />)}
+                {results.map((it) => <Card key={it.id} it={it} onOpen={(x) => { setView(x); setQtyLocal(1) }} onAdd={onAdd} fav={favs.includes(it.id)} onFav={onFav} />)}
               </ul>
             )}
 
@@ -339,6 +354,18 @@ export default function Shop() {
       </main>
       <Footer />
 
+      {count > 0 && (
+        <>
+          <div className="h-20 bg-ink" aria-hidden="true" />
+          <div id="cart-bar" className="fixed inset-x-0 bottom-0 z-40 bg-ink px-4 py-2.5 shadow-[0_-4px_0_rgb(0_0_0/0.25)]">
+            <div className="mx-auto flex max-w-6xl items-center gap-3">
+              <p className="flex-1 font-bold text-cream" aria-live="polite">{count} {count === 1 ? 'item' : 'items'} sa bilao · <span className="text-yellow">{peso(total)}</span></p>
+              <Link to="/checkout" className="btn btn-yellow">Tingnan ang bilao →</Link>
+            </div>
+          </div>
+        </>
+      )}
+
       <Sheet open={sheet} onClose={() => setSheet(false)} title="Filters">
         <Filters f={f} setF={setF} base={base} pre="sheet" />
         <div className="mt-5 flex gap-2">
@@ -354,7 +381,7 @@ export default function Shop() {
             <p>{view.desc}</p>
             <p className="flex items-center justify-between font-bold">
               <span>{peso(view.price)} · {view.unit}</span>
-              <span aria-label={`Rating ${view.rating} sa 5`}><span aria-hidden="true">★ </span>{view.rating}</span>
+              <span aria-label={`Rating ${view.rating} sa 5, ${view.reviews} reviews`}><span aria-hidden="true">★ </span>{view.rating} ({view.reviews} reviews)</span>
             </p>
             <div className="flex items-center justify-between">
               <span className="font-bold">Ilan?</span>
@@ -370,6 +397,18 @@ export default function Shop() {
               onClick={() => { onAdd(view, qty); setView(null) }}>
               {view.available ? `+ Tusok — ${peso(view.price * qty)}` : 'Ubos na ngayon'}
             </button>
+            <section id="reviews" aria-label="Mga review">
+              <h3 className="display text-2xl">Sabi ng mga suki</h3>
+              <ul className="mt-2 flex flex-col gap-2">
+                {(REVIEWS[view.id] || []).map(([who, stars, text]) => (
+                  <li key={who} className="rounded-2xl bg-ink/10 p-3 text-sm">
+                    <p className="flex justify-between font-bold"><span>{who}</span><span aria-label={`${stars} sa 5 stars`}><span aria-hidden="true">{'★'.repeat(stars)}{'☆'.repeat(5 - stars)}</span></span></p>
+                    <p className="mt-0.5">{text}</p>
+                  </li>
+                ))}
+              </ul>
+              <p className="mt-1 text-xs text-ink/75">Sample reviews para sa demo.</p>
+            </section>
           </div>
         )}
       </Sheet>

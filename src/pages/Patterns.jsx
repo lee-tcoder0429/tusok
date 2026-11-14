@@ -38,6 +38,12 @@ const GROUPS = [
   ['Recommendations', [
     ['Contextual strip', '“Bagay dito: …” — nag-iiba depende sa laman ng bilao.', '/menu#reco'],
   ]],
+  ['E-commerce', [
+    ['Sticky cart bar', 'Lumalabas sa ibaba ng Menu kapag may laman ang bilao: bilang, total, at checkout button.', '/menu#grid'],
+    ['Paborito (wishlist)', 'Puso sa bawat card; “Paborito” button para ipakita lang ang mga na-save.', '/menu#favs'],
+    ['Ratings + reviews', 'Bilang ng reviews sa card; buong reviews sa quick view ng item.', '/menu#grid'],
+    ['Order history + reorder', '“Mga order ko”: lahat ng order sa device na ito, may “Order ulit”.', '/orders'],
+  ]],
   ['Gestures', [
     ['Drag to tusok', 'I-drag ang sticker papunta sa stick. Fallback: tap o Enter/Space.', '/#drag'],
     ['Swipe to remove', 'I-swipe pakaliwa ang item sa bilao. Fallback: × button.', '/checkout#cart'],

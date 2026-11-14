@@ -6,6 +6,7 @@ import { useStore } from '../store.jsx'
 const LINKS = [
   { to: '/menu', label: 'Menu' },
   { to: { pathname: '/', hash: '#kwento' }, label: 'Kwento' },
+  { to: '/orders', label: 'Mga order' },
   { to: '/v?promo=TUSOK50', label: 'Promo' },
   { to: '/board', label: 'Board' },
 ]

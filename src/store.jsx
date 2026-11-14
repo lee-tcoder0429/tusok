@@ -3,7 +3,7 @@ import { byId } from './data/menu.js'
 
 export const VOUCHERS = { TUSOK50: 50 }
 const KEY = 'tusok:v1'
-const DEFAULTS = { cart: {}, promo: null, sawsawan: 'matamis', orders: [] }
+const DEFAULTS = { cart: {}, promo: null, sawsawan: 'matamis', orders: [], favs: [] }
 
 function load() {
   try {
@@ -64,6 +64,7 @@ export function StoreProvider({ children }) {
     return true
   }, [])
   const removePromo = useCallback(() => setS((p) => ({ ...p, promo: null })), [])
+  const toggleFav = useCallback((id) => setS((p) => ({ ...p, favs: p.favs.includes(id) ? p.favs.filter((x) => x !== id) : [...p.favs, id] })), [])
   const setSawsawan = useCallback((v) => setS((p) => ({ ...p, sawsawan: v })), [])
   const addOrder = useCallback((o) => setS((p) => ({ ...p, orders: [...p.orders.filter((x) => x.id !== o.id), o] })), [])
   const updateOrder = useCallback((id, patch) => setS((p) => ({
@@ -78,9 +79,9 @@ export function StoreProvider({ children }) {
     const total = Math.max(0, subtotal - discount)
     return {
       ...s, lines, count, subtotal, discount, total, toasts, bump,
-      add, setQty, clearCart, applyPromo, removePromo, setSawsawan, addOrder, updateOrder, toast, dismiss,
+      toggleFav, add, setQty, clearCart, applyPromo, removePromo, setSawsawan, addOrder, updateOrder, toast, dismiss,
     }
-  }, [s, toasts, bump, add, setQty, clearCart, applyPromo, removePromo, setSawsawan, addOrder, updateOrder, toast, dismiss])
+  }, [s, toasts, bump, toggleFav, add, setQty, clearCart, applyPromo, removePromo, setSawsawan, addOrder, updateOrder, toast, dismiss])
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>
 }
