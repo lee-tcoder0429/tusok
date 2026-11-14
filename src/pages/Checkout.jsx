@@ -18,6 +18,17 @@ const validators = {
   email: (v) => (!v.trim() ? 'Kailangan ang email para sa confirmation.' : EMAIL_RE.test(v.trim()) ? '' : 'Kulang ang email — dapat may @ at domain.'),
 }
 
+// Catch common domain typos (e.g. gmal.com) before the order is placed — a mistyped address bounces.
+const DOMAIN_FIX = {
+  'gmal.com': 'gmail.com', 'gmial.com': 'gmail.com', 'gmai.com': 'gmail.com', 'gmil.com': 'gmail.com', 'gnail.com': 'gmail.com',
+  'gmail.co': 'gmail.com', 'gmail.con': 'gmail.com', 'gmail.cm': 'gmail.com', 'gmaill.com': 'gmail.com', 'gamil.com': 'gmail.com',
+  'yaho.com': 'yahoo.com', 'yahooo.com': 'yahoo.com', 'yahoo.con': 'yahoo.com', 'outlok.com': 'outlook.com', 'hotmial.com': 'hotmail.com',
+}
+function suggestEmail(v) {
+  const [user, domain] = v.trim().toLowerCase().split('@')
+  return user && DOMAIN_FIX[domain] ? `${v.trim().split('@')[0]}@${DOMAIN_FIX[domain]}` : ''
+}
+
 function pickupOptions() {
   const out = ['ASAP (~10 min)']
   const d = new Date(Date.now() + 15 * 60000)
@@ -185,6 +196,14 @@ export default function Checkout() {
         onBlur={blur(k)} aria-invalid={errors[k] ? 'true' : 'false'} aria-describedby={errors[k] ? `e-${k}` : undefined} {...props}
       />
       {errors[k] && <p id={`e-${k}`} role="alert" className="mt-1 text-sm font-bold text-[#B91C1C]">{errors[k]}</p>}
+      {k === 'email' && !errors[k] && suggestEmail(form.email) && (
+        <p role="status" className="mt-1 text-sm font-bold">
+          Ibig mo bang sabihin{' '}
+          <button type="button" className="min-h-11 underline" onClick={() => setForm({ ...form, email: suggestEmail(form.email) })}>
+            {suggestEmail(form.email)}
+          </button>?
+        </p>
+      )}
     </div>
   )
 
