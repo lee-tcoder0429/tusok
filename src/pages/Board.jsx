@@ -7,6 +7,8 @@ import { liveStatus, T_READY } from '../lib/status.js'
 import { VOUCHER_URL, pad } from '../lib/util.js'
 
 const NAMES = ['J', 'Jed', 'JC', 'Haya', 'Vaughn', 'Yosh', 'Drei', 'Andrei', 'Shane', 'Abby', 'Erron', 'Aeron', 'Dom', 'Ranzel']
+const SEED_STEP = 10000 // one sample order finishes every 10s
+const SEED_COOK = 3 * SEED_STEP // so each sample order spends 30s in the queue
 const READY_TTL = 5 * 60 * 1000 // real ready orders drop off the board after 5 minutes
 
 // Seeded demo orders so the board never looks empty (fallback mode only).
@@ -18,18 +20,34 @@ function initialSeeds() {
     list: [
       { key: 's12', no: '012', name: NAMES[0], status: 'ready', readyAt: now - 90000 },
       { key: 's14', no: '014', name: NAMES[1], status: 'ready', readyAt: now - 4000 },
-      { key: 's15', no: '015', name: NAMES[2], status: 'cooking' },
-      { key: 's16', no: '016', name: NAMES[3], status: 'cooking' },
-      { key: 's17', no: '017', name: NAMES[4], status: 'cooking' },
+      { key: 's15', no: '015', name: NAMES[2], status: 'cooking', start: now - 2 * SEED_STEP, eta: now + SEED_STEP },
+      { key: 's16', no: '016', name: NAMES[3], status: 'cooking', start: now - SEED_STEP, eta: now + 2 * SEED_STEP },
+      { key: 's17', no: '017', name: NAMES[4], status: 'cooking', start: now, eta: now + SEED_COOK },
     ],
   }
 }
 
-function Chip({ o, ready }) {
+function Chip({ o, ready, now }) {
+  if (ready) {
+    return (
+      <li className="chip-across flex items-baseline gap-3 rounded-full bg-yellow px-5 py-2 text-ink lg:px-7 lg:py-3">
+        <span className="display text-3xl lg:text-5xl">#{o.no}</span>
+        <span className="truncate text-xl font-bold lg:text-3xl">{o.name}</span>
+      </li>
+    )
+  }
+  const pct = o.eta ? Math.max(4, Math.min(100, Math.round(((now - o.start) / (o.eta - o.start)) * 100))) : 0
   return (
-    <li className={`${ready ? 'chip-across bg-yellow text-ink' : 'chip-in bg-cream text-ink'} flex items-baseline gap-3 rounded-full px-5 py-2 lg:px-7 lg:py-3`}>
-      <span className="display text-3xl lg:text-5xl">#{o.no}</span>
-      <span className="truncate text-xl font-bold lg:text-3xl">{o.name}</span>
+    <li className="chip-in rounded-[28px] bg-cream px-5 pb-3 pt-2 text-ink lg:rounded-[36px] lg:px-7 lg:pb-4 lg:pt-3">
+      <div className="flex items-baseline gap-3">
+        <span className="display text-3xl lg:text-5xl">#{o.no}</span>
+        <span className="min-w-0 flex-1 truncate text-xl font-bold lg:text-3xl">{o.name}</span>
+        <span className="text-sm font-bold tabular-nums lg:text-xl" aria-hidden="true">{pct}%</span>
+      </div>
+      <div role="progressbar" aria-label={`Order ${o.no}, ${o.name}: niluluto`} aria-valuemin={0} aria-valuemax={100} aria-valuenow={pct}
+        className="mt-1.5 h-2.5 overflow-hidden rounded-full bg-ink/15 lg:h-3.5">
+        <div className="h-full rounded-full bg-orange transition-[width] duration-1000 ease-linear" style={{ width: `${pct}%` }} />
+      </div>
     </li>
   )
 }
@@ -62,15 +80,15 @@ export default function Board() {
       const drop = ready.length > 3 ? ready[0].key : null
       return {
         next: s.next + 1, name: s.name + 1,
-        list: [...list.filter((o) => o.key !== drop), { key: `s${s.next}`, no: pad(s.next), name: NAMES[s.name % NAMES.length], status: 'cooking' }],
+        list: [...list.filter((o) => o.key !== drop), { key: `s${s.next}`, no: pad(s.next), name: NAMES[s.name % NAMES.length], status: 'cooking', start: Date.now(), eta: Date.now() + SEED_COOK }],
       }
-    }), 10000)
+    }), SEED_STEP)
     return () => clearInterval(t)
   }, [])
 
   const real = useMemo(() => (remote ?? orders).map((o) => {
     const status = liveStatus(o, now)
-    return { key: `o${o.id}`, no: o.no, name: String(o.name).split(' ')[0], status, readyAt: o.createdAt + T_READY }
+    return { key: `o${o.id}`, no: o.no, name: String(o.name).split(' ')[0], status, readyAt: o.createdAt + T_READY, start: o.createdAt, eta: o.createdAt + T_READY }
   }).filter((o) => o.status !== 'done' && !(o.status === 'ready' && now - o.readyAt > READY_TTL)), [remote, orders, now])
 
   const useSeeds = !fbEnabled || real.length === 0
@@ -111,7 +129,7 @@ export default function Board() {
         <section className="grid grid-cols-2 gap-4 p-6 lg:gap-8 lg:p-10" aria-label="Pila ng mga order">
           <div>
             <h2 className="display border-b-4 border-cream/40 pb-2 text-4xl lg:text-6xl">Pinriprito <span className="text-cream/70">{cooking.length}</span></h2>
-            <ul className="mt-4 flex flex-col gap-3" aria-label="Pinriprito pa">{cooking.map((o) => <Chip key={o.key} o={o} />)}</ul>
+            <ul className="mt-4 flex flex-col gap-3" aria-label="Pinriprito pa">{cooking.map((o) => <Chip key={o.key} o={o} now={now} />)}</ul>
           </div>
           <div>
             <h2 className="display border-b-4 border-yellow pb-2 text-4xl text-yellow lg:text-6xl">Ready na <span className="opacity-80">{ready.length}</span></h2>
