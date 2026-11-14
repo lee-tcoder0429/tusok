@@ -88,6 +88,8 @@ export default function Voucher() {
     setEmailState({ status: 'sending', msg: '' })
     try {
       await sendEmail({
+        subject: `TUSOK voucher mo: ${code} (₱${VOUCHERS[code]} off)`,
+        message: `Ito ang voucher mo. Buksan ang link sa baba para magamit — auto-apply na ’yan sa checkout.`,
         to_name: 'Ka-tusok', to_email: email.trim(), order_no: `Voucher ${code}`,
         items: `Voucher ${code} — ₱${VOUCHERS[code]} off sa order mo`, total: `−₱${VOUCHERS[code]}`,
         sawsawan: '—', pickup: '—', track_url: VOUCHER_URL,

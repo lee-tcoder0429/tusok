@@ -4,7 +4,8 @@ import Header from '../components/Header.jsx'
 import { useStore } from '../store.jsx'
 import { STAGES, T_COOK, T_READY, liveStatus } from '../lib/status.js'
 import { fbGetOrder, fbSetStatus, fbEnabled } from '../lib/firebase.js'
-import { fmtTime, pad, vibrate } from '../lib/util.js'
+import { SITE_URL, fmtTime, pad, vibrate } from '../lib/util.js'
+import { sendEmail } from '../lib/email.js'
 import { peso } from '../data/menu.js'
 
 const COPY = {
@@ -105,6 +106,21 @@ export default function Tracker() {
       updateOrder(order.id, { notified: true })
       vibrate([120, 60, 120])
       if (soundRef.current) playDing()
+      // Second email: "ready na". Sent from this page, so it goes out when the tracker is open
+      // (or the next time it is opened). Skipped when we don't have the address on this device.
+      if (order.email) {
+        sendEmail({
+          subject: `TUSOK order #${order.no} — READY NA!`,
+          message: `Ready na ang order #${order.no} mo! Kunin mo na sa kanto habang mainit pa.`,
+          to_name: order.name, to_email: order.email, order_no: `#${order.no}`,
+          items: [
+            ...order.items.map((i) => `${i.qty} × ${i.name} (${i.unit}) — ₱${i.qty * i.price}`),
+            ...(order.discount ? [`Voucher ${order.promo} — −₱${order.discount}`] : []),
+          ].join('\n'),
+          total: `₱${order.total}`, sawsawan: order.sawsawan, pickup: order.pickup,
+          track_url: `${SITE_URL}/order/${order.id}`,
+        }).catch((err) => console.warn('Ready email not sent:', err))
+      }
       if (canNotify && Notification.permission === 'granted') {
         try { new Notification(`TUSOK: Ready na ang order #${order.no}!`, { body: `${order.name}, kunin mo na sa kanto habang mainit pa.` }) } catch { /* some mobile browsers need a service worker */ }
       }

@@ -159,6 +159,8 @@ export default function Checkout() {
     ].join('\n')
     try {
       await sendEmail({
+        subject: `TUSOK order #${no} — natanggap na!`,
+        message: `Salamat sa order mo sa TUSOK! Pasok na ang order #${no}. Ito ang resibo mo. Mag-e-email ulit kami pag ready na.`,
         to_name: order.name, to_email: order.email, order_no: `#${no}`, items: itemsText,
         total: `₱${total}`, sawsawan: sawName, pickup: order.pickup, track_url: `${SITE_URL}/order/${id}`,
       })
