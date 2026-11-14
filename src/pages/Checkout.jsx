@@ -7,7 +7,7 @@ import Stepper from '../components/Stepper.jsx'
 import { SAWSAWAN, peso } from '../data/menu.js'
 import { useStore } from '../store.jsx'
 import { nextOrderId } from '../lib/orders.js'
-import { sendEmail } from '../lib/email.js'
+import { sendEmail, emailErrorText } from '../lib/email.js'
 import { fbWriteOrder } from '../lib/firebase.js'
 import { SITE_URL, pad } from '../lib/util.js'
 
@@ -167,6 +167,7 @@ export default function Checkout() {
     } catch (err) {
       console.warn('Email not sent:', err)
       order.emailFailed = true
+      order.emailError = emailErrorText(err)
     }
     st.addOrder(order)
     fbWriteOrder(order)

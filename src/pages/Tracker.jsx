@@ -175,7 +175,7 @@ export default function Tracker() {
       <main id="main" className="mx-auto max-w-xl px-4 pb-20">
         {order.emailFailed && !noticeClosed && (
           <div role="status" className="on-light mb-3 flex items-center gap-2 rounded-2xl bg-cream p-3 pl-4 text-sm text-ink">
-            <span className="flex-1">Hindi na-send ang email, pero pasok ang order mo.</span>
+            <span className="flex-1">Hindi na-send ang email, pero pasok ang order mo.{order.emailError && <span className="block text-xs opacity-80">Dahilan: {order.emailError}</span>}</span>
             <button type="button" onClick={() => setNoticeClosed(true)} className="min-h-11 px-2 font-bold underline">OK</button>
           </div>
         )}
