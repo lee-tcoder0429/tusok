@@ -53,6 +53,8 @@ body {
     repeating-linear-gradient(-45deg, rgb(28 10 3 / 0.08) 0 10px, transparent 10px 20px);
 }
 
+/* In the components layer so Tailwind utilities (hidden, w-full, leading-*) can override them */
+@layer components {
 .display { font-family: var(--font-display); text-transform: uppercase; line-height: 0.92; letter-spacing: 0.01em; }
 
 .btn {
@@ -77,6 +79,7 @@ body {
 .field[aria-invalid="true"] { border-color: #B91C1C; background: #FEF2F2; }
 
 .sticker { filter: drop-shadow(0 3px 0 rgb(28 10 3 / 0.28)); }
+}
 
 .no-scrollbar { scrollbar-width: none; }
 .no-scrollbar::-webkit-scrollbar { display: none; }

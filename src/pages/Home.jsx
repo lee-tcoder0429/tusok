@@ -100,7 +100,7 @@ function Hero() {
     <section className="banig relative overflow-hidden pb-10" aria-labelledby="hero-h">
       <Header />
       <div className="mx-auto max-w-6xl px-4">
-        <h1 id="hero-h" className="display text-[23vw] leading-[0.86] text-yellow sm:text-[9rem]">Sarap ng kanto</h1>
+        <h1 id="hero-h" className="display text-[23vw] leading-[0.95] text-yellow sm:text-[9rem]">Sarap ng kanto</h1>
         <p className="mt-2 max-w-sm text-lg">Fishball, kwek-kwek, isaw — itusok mo, kami na ang bahala.</p>
 
         <div id="drag" className="relative mx-auto mt-4 h-[350px] max-w-md select-none" role="group" aria-label="Laro: itusok ang pagkain sa stick">
