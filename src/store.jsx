@@ -36,7 +36,7 @@ export function StoreProvider({ children }) {
   const dismiss = useCallback((id) => setToasts((t) => t.filter((x) => x.id !== id)), [])
   const toast = useCallback((msg, action) => {
     const id = ++tid.current
-    setToasts((t) => [...t.slice(-1), { id, msg, action }])
+    setToasts([{ id, msg, action }]) // one at a time so toasts never stack over buttons
     setTimeout(() => dismiss(id), action ? 5000 : 3000)
   }, [dismiss])
 
